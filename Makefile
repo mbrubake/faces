@@ -4,6 +4,10 @@ capture: capture.cpp
 capture_vid: capture_vid.cpp
 	clang capture_vid.cpp -I/usr/include/openni2 -lOpenNI2 -I/usr/include/vtk-5.8 -I/usr/include/pcl-1.7 -lpcl_common -lpcl_io -I/usr/lib -lstdc++ -lboost_system -lpcl_visualization -lpcl_filters  -lvtkCommon -I/usr/include/eigen3 -o capture_vid
 
+capture2: capture2.cpp
+	clang capture2.cpp -I/usr/include/openni2 -lOpenNI2 -I/usr/include/vtk-5.8 -I/usr/include/pcl-1.7 -lpcl_common -lpcl_io -I/usr/lib -lstdc++ -lboost_system -lpcl_visualization -lpcl_filters  -lvtkCommon -I/usr/include/eigen3 -o capture2
+
+
 register: register.cpp
 	clang register.cpp  -I/usr/lib -I/usr/include/pcl-1.7 -I/usr/include/eigen3 -lstdc++ -lm -lboost_system -lpcl_common -lpcl_io -lpcl_registration -lpcl_search -lpcl_visualization -lpcl_filters -I/usr/include/vtk-5.8 -lvtkCommon -o register
 

@@ -7,6 +7,7 @@
 #include <pcl/range_image/range_image_planar.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/filter.h>
+#include <ctime>
 
 using namespace openni;
 using namespace std;
@@ -49,22 +50,32 @@ int main(int argc, char** argv)
 		int mode_id = atoi(argv[1]);
 		vector<void*> data;
 		OpenNI::initialize();
-		Device* cam = new Device();
-		cam->open(ANY_DEVICE);
 
-		VideoStream* vid = new VideoStream();
-		vid->create(*cam, SENSOR_DEPTH);
+		Array<DeviceInfo>* deviceInfoList = new Array<DeviceInfo>;
+		OpenNI::enumerateDevices(deviceInfoList);
+		Device* cam1 = new Device();
+		Device* cam2 = new Device();
+		cam1->open(deviceInfoList->operator[](0).getUri());
+		cam2->open(deviceInfoList->operator[](1).getUri());
+		
+		VideoStream* vid1 = new VideoStream();
+		VideoStream* vid2 = new VideoStream();
+		vid1->create(*cam1, SENSOR_DEPTH);
+		vid2->create(*cam2, SENSOR_DEPTH);
+		
 		VideoMode mode;
-		mode = vid->getSensorInfo().getSupportedVideoModes()[mode_id];
+		mode = vid1->getSensorInfo().getSupportedVideoModes()[mode_id];
 		int width = mode.getResolutionX();
 		int height = mode.getResolutionY();
 		cout << "Pixel Format: " << mode.getPixelFormat() << endl;
 		cout << "Resolution: " << mode.getResolutionX() << "x" << mode.getResolutionY() << endl;
 
-		vid->setVideoMode(mode);
-		vid->start();
+		vid1->setVideoMode(mode);
+		vid2->setVideoMode(mode);
+		vid1->start();
 		VideoFrameRef* frame;
-		vid->readFrame(frame);
+		vid1->readFrame(frame);
+		vid1->stop();
 		int datasize = frame->getDataSize();
 		frame->release();
 
@@ -73,21 +84,37 @@ int main(int argc, char** argv)
 				data.push_back(new void* [datasize]);
 		}
 		cin.ignore();
+
+		std::time_t start = time(0);
 		for(int i = 0; i < num_frames; i++)
 		{
-				vid->readFrame(frame);
+				if(i%2 == 0)
+				{
+						vid1->start();
+						vid1->readFrame(frame);
+						vid1->stop();
+				}
+				else
+				{
+						vid2->start();
+						vid2->readFrame(frame);
+						vid2->stop();
+				}
 				memcpy(data[i], frame->getData(), datasize);
 				frame->release();
 		}
-		vid->stop();
-		cam->close();
+		time_t end = time(0);
+		double diff = difftime(end,start)* 1000.0;
+		cout<< diff << endl;
+		cam1->close();
+		cam2->close();
 		for(int i = 0; i < num_frames; i++)
 		{
 				PointCloud<PointXYZ> cloud = toPCD(data[i],width,height);
 				stringstream filename;
 				filename << "scans/" << i << ".pcd";
 				io::savePCDFileBinary(filename.str(), cloud);
-				cout << "saved cloud of " << cloud.points.size() << " to " << filename.str()  << endl;
+				cout << "saved cloud of " << cloud.points.size() << " to " << filename.str() << endl;
 		}
 		//        visualization::CloudViewer viewer("Test");
 		//        viewer.showCloud(cloud.makeShared());

@@ -12,17 +12,17 @@ using namespace std;
 int main(int argc, char** argv)
 {
 		PointCloud<PointXYZ>::Ptr cloud1(new PointCloud<PointXYZ>);
-		io::loadPCDFile<PointXYZ>("scans/s0.pcd", *cloud1);
+		io::loadPCDFile<PointXYZ>("scans/0.pcd", *cloud1);
 		Eigen::Matrix4f guess = Eigen::Matrix4f::Identity(); 
 		int freq = atoi(argv[3]);
 		for(int it = 1; it < atoi(argv[1]); it++)
 		{
 				PointCloud<PointXYZ>::Ptr cloud2(new PointCloud<PointXYZ>);
 				stringstream filename;
-				filename << "scans/s" << it << ".pcd";
+				filename << "scans/" << it << ".pcd";
 				io::loadPCDFile<PointXYZ>(filename.str(), *cloud2);
 
-				IterativeClosestPointNonLinear<PointXYZ, PointXYZ> icp;
+				IterativeClosestPoint<PointXYZ, PointXYZ> icp;
 				icp.setInputCloud(cloud2);
 				icp.setInputTarget(cloud1);
 
