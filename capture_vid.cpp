@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 		{
 				PointCloud<PointXYZ> cloud = toPCD(data[i],width,height);
 				stringstream filename;
-				filename << "/home/jonathan/scans/" << i << ".pcd";
+				filename << "scans/" << i << ".pcd";
 				io::savePCDFileBinary(filename.str(), cloud);
 				cout << "saved cloud of " << cloud.points.size() << " to ~/scans/" << i << ".pcd" << endl;
 		}

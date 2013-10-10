@@ -15,7 +15,7 @@ int main (int argc, char** argv)
 		{
 				pcl::PointCloud <pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud <pcl::PointXYZ>);
 				std::stringstream filename;
-				filename << "/home/jonathan/scans/" << i << ".pcd";
+				filename << "scans/" << i << ".pcd";
 				if ( pcl::io::loadPCDFile <pcl::PointXYZ> (filename.str(), *cloud) == -1 )
 				{
 						std::cout << "Cloud reading failed." << std::endl;
@@ -69,7 +69,7 @@ int main (int argc, char** argv)
 
 				//  pcl::PointCloud <pcl::PointXYZRGB>::Ptr colored_cloud = seg.getColoredCloud ();
 				stringstream sfilename;
-				sfilename << "/home/jonathan/scans/s" << i << ".pcd";
+				sfilename << "scans/s" << i << ".pcd";
 				io::savePCDFileBinary(sfilename.str(), *cloud);
 				cout << "saved cloud of " << cloud->points.size() << " to " << sfilename.str() << endl;
 

@@ -12,14 +12,14 @@ using namespace std;
 int main(int argc, char** argv)
 {
 		PointCloud<PointXYZ>::Ptr cloud1(new PointCloud<PointXYZ>);
-		io::loadPCDFile<PointXYZ>("/home/jonathan/scans/s0.pcd", *cloud1);
+		io::loadPCDFile<PointXYZ>("scans/s0.pcd", *cloud1);
 		Eigen::Matrix4f guess = Eigen::Matrix4f::Identity(); 
 		int freq = atoi(argv[3]);
 		for(int it = 1; it < atoi(argv[1]); it++)
 		{
 				PointCloud<PointXYZ>::Ptr cloud2(new PointCloud<PointXYZ>);
 				stringstream filename;
-				filename << "/home/jonathan/scans/s" << it << ".pcd";
+				filename << "scans/s" << it << ".pcd";
 				io::loadPCDFile<PointXYZ>(filename.str(), *cloud2);
 
 				IterativeClosestPointNonLinear<PointXYZ, PointXYZ> icp;
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 				}
 				guess = icp.getFinalTransformation();
 		}
-		io::savePCDFileBinary("/home/jonathan/scans/merged.pcd", *cloud1);
+		io::savePCDFileBinary("scans/merged.pcd", *cloud1);
 		visualization::CloudViewer viewer("Test");
 		viewer.showCloud(cloud1->makeShared());
 		while(!viewer.wasStopped()){}

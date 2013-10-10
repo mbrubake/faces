@@ -55,7 +55,7 @@ int main (int argc, char** argv)
 		poisson.setInputCloud(cloud_with_normals);
 		poisson.setSearchMethod(tree2);
 		poisson.performReconstruction(triangles);
-		pcl::io::savePolygonFileSTL("/home/jonathan/meshes/0.stl",triangles);
-		cout << "saved /home/jonathan/meshes/0.stl" << endl;
+		pcl::io::savePolygonFileSTL("meshes/0.stl",triangles);
+		cout << "saved meshes/0.stl" << endl;
 		return (0);
 }

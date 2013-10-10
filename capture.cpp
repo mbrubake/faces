@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 				cloud.width = cloud.points.size();
 				cout << cloud.points.size() << " points" << endl;
 				stringstream filename;
-				filename << "/home/jonathan/scans/" << it << ".pcd";
+				filename << "scans/" << it << ".pcd";
 				io::savePCDFileBinary(filename.str(), cloud);
 				cout << "saved " << "~/scans/" << it << ".pcd" << endl;
 				frame->release();
