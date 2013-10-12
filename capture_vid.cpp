@@ -1,4 +1,6 @@
-#include "openni2/OpenNI.h"
+#include "OpenNI.h"
+#include <PS1080.h>
+//#include <openni2/XnLog.h>
 #include <iostream>
 #include <string>
 
@@ -62,7 +64,24 @@ int main(int argc, char** argv)
 		cout << "Resolution: " << mode.getResolutionX() << "x" << mode.getResolutionY() << endl;
 
 		vid->setVideoMode(mode);
+		bool closerange;
+		vid->getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &closerange);
+		cout << closerange << endl;
+		vid->setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, true);
+		vid->getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &closerange);
+		cout << closerange << endl;
 		vid->start();
+		cout << vid->setEmitterEnabled(false) << endl;
+		cout << vid->setEmitterEnabled(true) << endl;
+		cout << vid ->setEmitterEnabled(false) << endl;
+//for(int i = 0; i < 100; i++)
+//		{
+//				vid->setEmitterEnabled(ir);
+//				ir = !ir;
+//		}
+
+		cin.ignore();
+		cout << "done" << endl;
 		VideoFrameRef* frame;
 		vid->readFrame(frame);
 		int datasize = frame->getDataSize();
