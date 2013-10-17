@@ -1,11 +1,11 @@
 capture: capture.cpp
-	clang capture.cpp -I/usr/include/openni2 -lOpenNI2 -I/usr/include/vtk-5.8 -I/usr/include/pcl-1.7 -lpcl_common -lpcl_io -I/usr/lib -lstdc++ -lboost_system -lpcl_visualization -lpcl_filters  -lvtkCommon -I/usr/include/eigen3 -o capture
+	clang capture.cpp -I/home/jonathan/OpenNI/Include -L/home/jonathan/OpenNI/Redist -lOpenNI2 -I/usr/include/vtk-5.8 -I/usr/include/pcl-1.7 -lpcl_common -lpcl_io -I/usr/lib -lstdc++ -lboost_system -lpcl_visualization -lpcl_filters  -lvtkCommon -I/usr/include/eigen3 -o capture
 
 capture_vid: capture_vid.cpp
-	clang capture_vid.cpp -I/home/jonathan/OpenNI/Include -L/home/jonathan/OpenNI/Redist -lOpenNI2 -I/usr/include/vtk-5.8 -I/usr/include/pcl-1.7 -lpcl_common -lpcl_io -I/usr/lib -lstdc++ -lboost_system -lpcl_visualization -lpcl_filters  -lvtkCommon -I/usr/include/eigen3 -o capture_vid
+	clang capture_vid.cpp -I/home/jonathan/OpenNI/Include -L/home/jonathan/OpenNI/Redist -lOpenNI2 -I/usr/include/vtk-5.8 -I/usr/include/pcl-1.7 -lpcl_common -lpcl_io -I/usr/lib -lstdc++ -lboost_system -lpcl_filters  -lvtkCommon -I/usr/include/eigen3 -o capture_vid
 
 capture2: capture2.cpp
-	clang capture2.cpp -I/usr/include/openni2 -lOpenNI2 -I/usr/include/vtk-5.8 -I/usr/include/pcl-1.7 -lpcl_common -lpcl_io -I/usr/lib -lstdc++ -lboost_system -lpcl_visualization -lpcl_filters  -lvtkCommon -I/usr/include/eigen3 -o capture2
+	clang capture2.cpp -I/home/jonathan/OpenNI/Include -L/home/jonathan/OpenNI/Redist -lOpenNI2 -I/usr/include/vtk-5.8 -I/usr/include/pcl-1.7 -lpcl_common -lpcl_io -I/usr/lib -lstdc++ -lboost_system -lpcl_filters  -lvtkCommon -I/usr/include/eigen3 -o capture2
 
 
 register: register.cpp

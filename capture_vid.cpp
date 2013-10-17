@@ -1,13 +1,11 @@
 #include "OpenNI.h"
 #include <PS1080.h>
-//#include <openni2/XnLog.h>
 #include <iostream>
 #include <string>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/range_image/range_image_planar.h>
-#include <pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/filter.h>
 
 using namespace openni;
@@ -53,7 +51,6 @@ int main(int argc, char** argv)
 		OpenNI::initialize();
 		Device* cam = new Device();
 		cam->open(ANY_DEVICE);
-
 		VideoStream* vid = new VideoStream();
 		vid->create(*cam, SENSOR_DEPTH);
 		VideoMode mode;
@@ -66,22 +63,11 @@ int main(int argc, char** argv)
 		vid->setVideoMode(mode);
 		bool closerange;
 		vid->getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &closerange);
-		cout << closerange << endl;
 		vid->setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, true);
 		vid->getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &closerange);
-		cout << closerange << endl;
 		vid->start();
-		cout << vid->setEmitterEnabled(false) << endl;
-		cout << vid->setEmitterEnabled(true) << endl;
-		cout << vid ->setEmitterEnabled(false) << endl;
-//for(int i = 0; i < 100; i++)
-//		{
-//				vid->setEmitterEnabled(ir);
-//				ir = !ir;
-//		}
+			
 
-		cin.ignore();
-		cout << "done" << endl;
 		VideoFrameRef* frame;
 		vid->readFrame(frame);
 		int datasize = frame->getDataSize();
@@ -94,7 +80,10 @@ int main(int argc, char** argv)
 		cin.ignore();
 		for(int i = 0; i < num_frames; i++)
 		{
+				cout << i << endl;
+				vid->setEmitterEnabled(true);
 				vid->readFrame(frame);
+				vid->setEmitterEnabled(false);
 				memcpy(data[i], frame->getData(), datasize);
 				frame->release();
 		}

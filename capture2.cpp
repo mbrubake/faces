@@ -1,11 +1,10 @@
-#include "openni2/OpenNI.h"
+#include "OpenNI.h"
 #include <iostream>
 #include <string>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/range_image/range_image_planar.h>
-#include <pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/filter.h>
 #include <ctime>
 
@@ -73,11 +72,14 @@ int main(int argc, char** argv)
 		vid1->setVideoMode(mode);
 		vid2->setVideoMode(mode);
 		vid1->start();
+		vid2->start();
 		VideoFrameRef* frame;
 		vid1->readFrame(frame);
-		vid1->stop();
 		int datasize = frame->getDataSize();
 		frame->release();
+
+		vid1->setEmitterEnabled(false);
+		vid2->setEmitterEnabled(false);
 
 		for(int i = 0; i < num_frames; i++)
 		{
@@ -90,15 +92,15 @@ int main(int argc, char** argv)
 		{
 				if(i%2 == 0)
 				{
-						vid1->start();
+						vid1->setEmitterEnabled(true);
 						vid1->readFrame(frame);
-						vid1->stop();
+						vid1->setEmitterEnabled(false);
 				}
 				else
 				{
-						vid2->start();
+						vid2->setEmitterEnabled(true);
 						vid2->readFrame(frame);
-						vid2->stop();
+						vid2->setEmitterEnabled(false);
 				}
 				memcpy(data[i], frame->getData(), datasize);
 				frame->release();
@@ -106,6 +108,9 @@ int main(int argc, char** argv)
 		time_t end = time(0);
 		double diff = difftime(end,start)* 1000.0;
 		cout<< diff << endl;
+
+		vid1->stop();
+		vid2->stop();
 		cam1->close();
 		cam2->close();
 		for(int i = 0; i < num_frames; i++)
@@ -116,7 +121,4 @@ int main(int argc, char** argv)
 				io::savePCDFileBinary(filename.str(), cloud);
 				cout << "saved cloud of " << cloud.points.size() << " to " << filename.str() << endl;
 		}
-		//        visualization::CloudViewer viewer("Test");
-		//        viewer.showCloud(cloud.makeShared());
-		//        while(!viewer.wasStopped()){}
 }

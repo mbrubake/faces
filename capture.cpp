@@ -1,4 +1,4 @@
-#include "openni2/OpenNI.h"
+#include "OpenNI.h"
 #include <iostream>
 #include <string>
 
