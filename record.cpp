@@ -15,26 +15,6 @@ using namespace openni;
 using namespace std;
 using namespace pcl;
 
-class FrameGetter : public VideoStream::NewFrameListener
-{
-		public:
-				vector<void*> data;
-				VideoFrameRef frame;
-				int datasize;
-				int i;
-				void onNewFrame(VideoStream& stream)
-				{
-						if(i < data.size())
-						{
-								stream.readFrame(&frame);
-								memcpy(data[i], frame.getData(), datasize);
-								frame.release();
-								i++;
-								cout << "snap" << i << endl;
-						}
-				}
-};
-
 PointCloud<PointXYZ> toPCD(const void* a, int width, int height, float xfov, float yfov)
 {
 		RangeImagePlanar range_im;
@@ -70,9 +50,10 @@ int main(int argc, char** argv)
 {
 		int mode_id = 5;
 		string folder = argv[1];
-		int num_frames = atoi(argv[2]);
-		int delay = atoi(argv[3]);
-		int delay2 = atoi(argv[4]);
+		int num_cycles = atoi(argv[2]);
+		int num_frames = atoi(argv[3]);
+		int delay = atoi(argv[4]);
+		int delay2 = atoi(argv[5]);
 		vector<void*> data1;
 		vector<void*> data2;
 		OpenNI::initialize();
@@ -109,46 +90,47 @@ int main(int argc, char** argv)
 		vid2->setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE,true);
 
 		VideoFrameRef* frame1 = new VideoFrameRef();
-		VideoFrameRef* frame2 = new VideoFrameRef();
 		vid1->readFrame(frame1);
 		int datasize = frame1->getDataSize();
-		frame1->release();
-
-		vid1->setEmitterEnabled(true);
-		vid2->setEmitterEnabled(true);
 
 		for(int i = 0; i < num_frames; i++)
 		{
 				data1.push_back(new void* [datasize]);
 				data2.push_back(new void* [datasize]);
 		}
-		cin.ignore();
 
-		FrameGetter d1;
-		FrameGetter d2;
-		d1.data = data1;
-		d2.data = data2;
-		d1.datasize = datasize;
-		d2.datasize = datasize;
-		d1.i=0;
-		d2.i=0;
-		vid1->addNewFrameListener(&d1);
-		vid2->addNewFrameListener(&d2);
-		while(d1.i < num_frames || d2.i < num_frames)
+		frame1->release();
+
+		vid1->setEmitterEnabled(false);
+		vid2->setEmitterEnabled(false);
+
+		cin.ignore();
+		Recorder r1;
+		Recorder r2;
+
+		r1.create("record1.oni");
+		r2.create("record2.oni");
+
+		r1.attach(*vid1, false);
+		r2.attach(*vid2, false);
+		r1.start();
+		r2.start();		
+		for(int i = 0; i < num_cycles; i++)
 		{
-				//cam1->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE, false);
+				cam1->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE, true);
 				usleep(delay2*1000);
-				//cam2->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE, true);
+				cam2->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE, false);
 				usleep(delay*1000);
 				cout << "a" << endl;
 
-				//cam2->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE,false);
+				cam2->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE,true);
 				usleep(delay2*1000);
-				//cam1->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE,true);
+				cam1->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE,false);
 				usleep(delay*1000);
 				cout << "b" << endl;
 		}
-
+		r1.stop();
+		r2.stop();
 		vid1->stop();
 		vid2->stop();
 		//vid1->destroy();
@@ -156,6 +138,39 @@ int main(int argc, char** argv)
 		cam1->close();
 		cam2->close();
 		//OpenNI::shutdown();
+		Device* rec1 = new Device();
+		Device* rec2 = new Device();
+		rec1->open("record1.oni");
+		rec2->open("record2.oni");
+		cout << "here" << endl;
+		VideoStream* stream1 = new VideoStream();
+		VideoStream* stream2 = new VideoStream();
+		stream1->create(*rec1, SENSOR_DEPTH);
+		stream2->create(*rec2, SENSOR_DEPTH);
+		cout << "here" << endl;
+		//stream1->setVideoMode(mode);
+		//stream2->setVideoMode(mode);
+
+		stream1->start();
+		stream2->start();
+
+		stream1->setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE,true);
+		stream2->setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE,true);
+		cout << "here" << endl;
+		for(int i = 0; i < num_frames; i++)
+		{
+				stream1->readFrame(frame1);
+				memcpy(data1[i], frame1->getData(), datasize);
+				frame1->release();
+		}
+
+		for(int i = 0; i < num_frames; i++)
+		{
+				stream2->readFrame(frame1);
+				memcpy(data2[i], frame1->getData(), datasize);
+				frame1->release();
+		}
+		cout << "here" << endl;
 		for(int i = 0; i < num_frames; i++)
 		{
 				PointCloud<PointXYZ> cloud = toPCD(data1[i],width,height,xfov,yfov);
@@ -179,4 +194,5 @@ int main(int argc, char** argv)
 				}
 
 		}
+
 }

@@ -30,7 +30,6 @@ class FrameGetter : public VideoStream::NewFrameListener
 								memcpy(data[i], frame.getData(), datasize);
 								frame.release();
 								i++;
-								cout << "snap" << i << endl;
 						}
 				}
 };
@@ -71,8 +70,6 @@ int main(int argc, char** argv)
 		int mode_id = 5;
 		string folder = argv[1];
 		int num_frames = atoi(argv[2]);
-		int delay = atoi(argv[3]);
-		int delay2 = atoi(argv[4]);
 		vector<void*> data1;
 		vector<void*> data2;
 		OpenNI::initialize();
@@ -114,9 +111,6 @@ int main(int argc, char** argv)
 		int datasize = frame1->getDataSize();
 		frame1->release();
 
-		vid1->setEmitterEnabled(true);
-		vid2->setEmitterEnabled(true);
-
 		for(int i = 0; i < num_frames; i++)
 		{
 				data1.push_back(new void* [datasize]);
@@ -136,26 +130,16 @@ int main(int argc, char** argv)
 		vid2->addNewFrameListener(&d2);
 		while(d1.i < num_frames || d2.i < num_frames)
 		{
-				//cam1->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE, false);
-				usleep(delay2*1000);
-				//cam2->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE, true);
-				usleep(delay*1000);
-				cout << "a" << endl;
-
-				//cam2->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE,false);
-				usleep(delay2*1000);
-				//cam1->setProperty(XN_MODULE_PROPERTY_EMITTER_STATE,true);
-				usleep(delay*1000);
-				cout << "b" << endl;
+				usleep(100000);
 		}
 
 		vid1->stop();
 		vid2->stop();
-		//vid1->destroy();
-		//vid2->destroy();
+		vid1->destroy();
+		vid2->destroy();
 		cam1->close();
 		cam2->close();
-		//OpenNI::shutdown();
+		OpenNI::shutdown();
 		for(int i = 0; i < num_frames; i++)
 		{
 				PointCloud<PointXYZ> cloud = toPCD(data1[i],width,height,xfov,yfov);
