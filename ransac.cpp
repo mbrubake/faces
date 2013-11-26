@@ -40,8 +40,8 @@ main (int argc, char **argv)
 
 		// Load object and scene
 		pcl::console::print_highlight ("Loading point clouds...\n");
-		if (pcl::io::loadPCDFile<PointNT> (argv[1], *object_orig) < 0 ||
-						pcl::io::loadPCDFile<PointNT> (argv[2], *scene_orig) < 0)
+		if (pcl::io::loadPCDFile<PointNT> (argv[1], *scene_orig) < 0 ||
+						pcl::io::loadPCDFile<PointNT> (argv[2], *object_orig) < 0)
 		{
 				pcl::console::print_error ("Error loading object/scene file!\n");
 				return (1);
@@ -134,10 +134,10 @@ main (int argc, char **argv)
 		copyPointCloud(*object_orig, *object_fullxyz);
 		copyPointCloud(*scene_orig, *scene_fullxyz);
 		transformPointCloud(*object_fullxyz, *object_fullxyz,transformation);
-		transformPointCloud(*object_orig, *object_orig, transformation);
+		transformPointCloudWithNormals(*object_orig, *object_orig, transformation);
 		*scene_orig += *object_orig;
 		//io::savePCDFileBinary("0align.pcd", *scene_fullxyz);
 		//io::savePCDFileBinary("1align.pcd", *object_fullxyz);
-		io::savePCDFileBinary("sac1.pcd", *scene_orig);
+		io::savePCDFileBinary("sac1.pcd", *object_orig);
 		return (0);
 }

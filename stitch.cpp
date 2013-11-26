@@ -46,6 +46,36 @@ void computeNormals(PointCloud<PointNT>::Ptr cloud)
 		norm_est.compute(*cloud);
 }
 
+void recomputeNormals(PointCloud<PointNT>::Ptr cloud)
+{
+		NormalEstimation<PointNT, Normal> norm_est;
+		PointCloud<Normal>::Ptr normals(new PointCloud<Normal>);
+		norm_est.setKSearch(30);
+		norm_est.setInputCloud(cloud);
+		norm_est.compute(*normals);
+		for(int i = 0; i < cloud->points.size(); i++)
+		{
+				if(cloud->points[i].normal_x * normals->points[i].normal_x + cloud->points[i].normal_y * normals->points[i].normal_y + cloud->points[i].normal_z * normals->points[i].normal_z < 0)
+				{
+						normals->points[i].normal_x *= -1;
+						normals->points[i].normal_y *= -1;
+						normals->points[i].normal_z *= -1;
+				}
+				cloud->points[i].normal_x = normals->points[i].normal_x;
+				cloud->points[i].normal_y = normals->points[i].normal_y;
+				cloud->points[i].normal_z = normals->points[i].normal_z;
+		}
+}
+
+
+Eigen::Matrix3f submatrix(Eigen::Matrix4f affine)
+{
+		Eigen::Matrix3f m;
+		m<<affine(0,0),affine(0,1),affine(0,2)
+				,affine(1,0),affine(1,1),affine(1,2)
+				,affine(2,0),affine(2,1),affine(2,2);
+		return m;
+}
 int main(int argc, char** argv)
 {
 		string folder = argv[1];
@@ -61,7 +91,7 @@ int main(int argc, char** argv)
 				computeNormals(cloud1);
 		}
 		Eigen::Matrix4f guess = Eigen::Matrix4f::Identity();
-
+		Eigen::Matrix3f lastguess = submatrix(guess).inverse();
 		for(int it = start+1; it <= end; it++)
 		{
 				PointCloud<PointNT>::Ptr cloud2(new PointCloud<PointNT>);
@@ -84,15 +114,23 @@ int main(int argc, char** argv)
 				guess = icp.getFinalTransformation();
 				cout << "frame: " << it << " score: " << icp.getFitnessScore() << endl;
 				PointCloud<PointNT>:: Ptr cloud3(new PointCloud<PointNT>);
-				transformPointCloud(*cloud2, *cloud3, guess);
+				Eigen::Matrix3f delta = submatrix(guess)*lastguess;
+				float angle= acos((delta.trace()-1)/2);
+				cout << angle <<endl;
+				if(abs(angle) > 0.25)
+				{
+						lastguess = submatrix(guess).inverse();
+				}
+				transformPointCloudWithNormals(*cloud2, *cloud3, guess);
 				*cloud1 += *cloud3;
 		}
-		PointCloud<PointT>::Ptr merged(new PointCloud<PointT>);
-		copyPointCloud(*cloud1, *merged);
+		recomputeNormals(cloud1);
+		PointCloud<PointT>::Ptr xyz(new PointCloud<PointT>);
+		copyPointCloud(*cloud1, *xyz);
 		visualization::CloudViewer viewer("Test");
-		viewer.showCloud(merged, "cloud");
+		viewer.showCloud(xyz, "cloud");
 		while(!viewer.wasStopped()){}
 
-		io::savePCDFileBinary(folder + "merged.pcd", *merged);
+		//io::savePCDFileBinary(folder + "merged.pcd", *merged);
 		io::savePCDFileBinary(folder + "mergednormal.pcd", *cloud1);
 }

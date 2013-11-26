@@ -7,10 +7,10 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-        PointCloud<PointXYZRGB>::Ptr cloud(new PointCloud<PointXYZRGB>);
+        PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
 		stringstream filename;
 		filename << argv[1];
-        io::loadPCDFile<PointXYZRGB>(filename.str(), *cloud);
+        io::loadPCDFile<PointXYZ>(filename.str(), *cloud);
 		visualization::CloudViewer viewer("Test");
 		viewer.showCloud(cloud->makeShared());
 		while(!viewer.wasStopped()){}

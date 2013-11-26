@@ -23,7 +23,7 @@ int main (int argc, char** argv)
 				pcl::PointCloud <PointT>::Ptr cloud (new pcl::PointCloud <PointT>);
 				std::stringstream filename;
 				filename << folder << i << ".pcd";
-				if ( pcl::io::loadPCDFile <PointT> (filename.str(), *cloud) == -1 )
+				if (pcl::io::loadPCDFile <PointT> (filename.str(), *cloud) == -1 )
 				{
 						std::cout << "Cloud reading failed." << std::endl;
 						return (-1);

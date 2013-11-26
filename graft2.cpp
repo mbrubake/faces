@@ -15,8 +15,8 @@ typedef pcl::PointXYZRGBNormal PointNT;
 int main (int argc, char** argv)
 {
 		// Load input file into a PointCloud<T> with an appropriate type
-		pcl::PointCloud<PointNT>::Ptr cloud_raw (new pcl::PointCloud<PointNT>);
-		pcl::io::loadPCDFile<PointNT> (argv[1], *cloud_raw);
+		pcl::PointCloud<PointNT>::Ptr cloud (new pcl::PointCloud<PointNT>);
+		pcl::io::loadPCDFile<PointNT> (argv[1], *cloud);
 
 		int poissonDepth = atoi(argv[2]);
 		float mlsSearchRadius = atof(argv[3]);
@@ -26,27 +26,20 @@ int main (int argc, char** argv)
 		{
 				VoxelGrid<PointNT> grid;
 				grid.setLeafSize(leaf_size,leaf_size,leaf_size);
-				grid.setInputCloud(cloud_raw);
-				grid.filter(*cloud_raw);
+				grid.setInputCloud(cloud);
+				grid.filter(*cloud);
 		}
-		PointCloud<PointNT>::Ptr cloud(new PointCloud<PointNT>);
-		cloud = cloud_raw;
-		vector<int> indices;
-		removeNaNFromPointCloud(*cloud, *cloud, indices);
-
-		pcl::PointCloud<PointNT>::Ptr cloud_with_normals (new pcl::PointCloud<PointNT>);
-		cloud_with_normals = cloud;
 
 		// Create search tree*
 		pcl::search::KdTree<PointNT>::Ptr tree2 (new pcl::search::KdTree<PointNT>);
-		tree2->setInputCloud (cloud_with_normals);
+		tree2->setInputCloud (cloud);
 
 		cout << "Poisson reconstruction..." << endl;
 		// Initialize objects
 		pcl::PolygonMesh triangles;
 		pcl::Poisson<PointNT> poisson;
 		poisson.setDepth(poissonDepth);
-		poisson.setInputCloud(cloud_with_normals);
+		poisson.setInputCloud(cloud);
 		poisson.setSearchMethod(tree2);
 		poisson.performReconstruction(triangles);
 		pcl::io::savePolygonFileSTL("mesh.stl",triangles);
