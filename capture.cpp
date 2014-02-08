@@ -165,13 +165,34 @@ int main(int argc, char** argv)
 
 	vidRGB->start();
 
-	VideoFrameRef* frameRGB = new VideoFrameRef();
-	vidRGB->readFrame(frameRGB);
-	int datasizeRGB = frameRGB->getDataSize();
+	VideoFrameRef frameRGB;
+	VideoFrameRef prevFrameRGB;
+	vidRGB->readFrame(&prevFrameRGB);
+	int datasizeRGB = prevFrameRGB.getDataSize();
 	cout << "RGB Datasize: " << datasizeRGB <<endl;
-	frameRGB->release();
 
-	cin.ignore();
+//	cin.ignore();
+	int numAbove = 0;
+	while (numAbove < 20) {
+		vidRGB->readFrame(&frameRGB);
+
+		double diff = 0;
+		for (int pi = 0; pi < datasizeRGB; pi++) {
+			float err = (float)((unsigned char*)frameRGB.getData())[pi] - (float)((unsigned char*)prevFrameRGB.getData())[pi]; 
+			diff += (err*err)/datasizeRGB;
+		}
+		if (diff > 50) {
+			numAbove++;
+		}
+		else {
+			numAbove = 0;
+		}
+
+		prevFrameRGB = frameRGB;
+	}
+	std::cout << "Significant motion detected, beginning to capture frames in 2 seconds..." << std::endl;
+	usleep(2000);
+	std::cout << "Capturing..." << std::endl;
 
 	for(int i = 0; i<num_frames; i++)
 	{
@@ -179,13 +200,12 @@ int main(int argc, char** argv)
 		dataRGB.push_back(new void*[datasizeRGB]);
 		//cout << "Frame: " << i << endl;
 		vid->readFrame(frame);
-		vidRGB->readFrame(frameRGB);
+		vidRGB->readFrame(&frameRGB);
 		memcpy(data[i], frame->getData(), datasize);
-		memcpy(dataRGB[i], frameRGB->getData(), datasizeRGB);
-		frame->release();
-		frameRGB->release();
-		
+		memcpy(dataRGB[i], frameRGB.getData(), datasizeRGB);
+
 		usleep(delay*1000);
+		prevFrameRGB = frameRGB;
 	}
 	vid->stop();
 	for(int i = 0; i < data.size(); i++)

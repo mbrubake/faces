@@ -1,5 +1,6 @@
 #include <iostream>
 #include <boost/make_shared.hpp>
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -68,7 +69,7 @@ void savePCDFiles(vector<PointCloud<PointNT>::Ptr> clouds, string output)
 {
 	for(int i=0; i<clouds.size(); i++)
 	{
-		io::savePCDFileBinary(output + boost::to_string(i) + ".pcd", *(clouds[i]));
+		io::savePCDFileBinary(output + boost::lexical_cast<std::string>(i) + ".pcd", *(clouds[i]));
 	}
 }
 
@@ -78,7 +79,7 @@ vector<PointCloud<PointNT>::Ptr> loadPCDFiles(string input, int start,int end)
 	for(int i=start; i<=end; i++)
 	{
 		PointCloud<PointNT>::Ptr scan(new PointCloud<PointNT>);
-		io::loadPCDFile<PointNT>(input + boost::to_string(i) + ".pcd", *scan);
+		io::loadPCDFile<PointNT>(input + boost::lexical_cast<std::string>(i) + ".pcd", *scan);
 		scans.push_back(scan);
 	}
 	return scans;
@@ -188,6 +189,7 @@ int main(int argc, char** argv)
 			computeNormals(cloud2, normal_radius1);
 		}
 		PointCloud<PointNT> transformed;
+		bool converged = true;
 
 		if(maxit >0)
 		{
@@ -205,19 +207,22 @@ int main(int argc, char** argv)
 
 
 			cout << "Frame " << it << " Score: " << icp.getFitnessScore() << endl;
+			converged = icp.hasConverged();
 		}
-		PointCloud<PointNT>:: Ptr cloud3(new PointCloud<PointNT>);
-		Eigen::Matrix3f delta = submatrix(guess)*lastguess;
-		float angle= acos((delta.trace()-1)/2);
-		cout << "Angle: " << abs(angle) <<endl;
-		transformPointCloudWithNormals(*cloud2, *cloud3, guess);
+		if (converged) {
+			PointCloud<PointNT>:: Ptr cloud3(new PointCloud<PointNT>);
+			Eigen::Matrix3f delta = submatrix(guess)*lastguess;
+			float angle= acos((delta.trace()-1)/2);
+			cout << "Angle: " << abs(angle) <<endl;
+			transformPointCloudWithNormals(*cloud2, *cloud3, guess);
 
-		if(abs(angle) > min_angle)
-		{
-			lastguess = submatrix(guess).inverse();
-			*combined += *cloud3;
+			if(abs(angle) > min_angle)
+			{
+				lastguess = submatrix(guess).inverse();
+				*combined += *cloud3;
+			}
+			clouds[it]=cloud3;
 		}
-		clouds[it]=cloud3;
 	}
 	recomputeNormals(combined, normal_radius2);
 	cout << "Saving clouds to " << output << endl;
